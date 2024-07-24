@@ -6,14 +6,24 @@ import { API_URL } from "@/config";
 import { Event, EventData } from "@/types/event";
 import style from "@/styles/Event.module.css";
 
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useRouter } from "next/router";
+
 interface EventProps {
   evt: EventData;
 }
 
 const EventPage = ({ evt }: EventProps) => {
-  const deleteEvent = (e: any) => {
-    e.preventDefault();
-    console.log("delete");
+  const router = useRouter();
+  const deleteEvent = async (e: any) => {
+    if (confirm("Are you sure?")) {
+      const res = fetch(`${API_URL}/api/events/${evt.id}`, {
+        method: "DELETE",
+      }).then(() => {
+        router.push("/events");
+      });
+    }
   };
   return (
     <Layout title="Event">
@@ -24,17 +34,17 @@ const EventPage = ({ evt }: EventProps) => {
               <FaPencilAlt /> Edit Event
             </span>
           </Link>
-          <Link href={`/events/delete/${evt.id}`}>
-            <span className={style.delete}>
-              <FaTimes /> Delete Event
-            </span>
-          </Link>
+
+          <a href="#" className={style.delete} onClick={deleteEvent}>
+            <FaTimes /> Delete Event
+          </a>
         </div>
         <span>
           {new Date(evt.attributes.date).toLocaleDateString("en-US")} at{" "}
           {evt.attributes.time}
         </span>
         <h1>{evt.attributes.name}</h1>
+        <ToastContainer />
         {evt.attributes.img && (
           <div className={style.image}>
             <Image src={evt.attributes.img} width={960} height={600} alt="" />
