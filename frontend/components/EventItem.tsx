@@ -1,28 +1,31 @@
 import Link from "next/link";
 import Image from "next/image";
 import style from "@/styles/EventItem.module.css";
-import { Event } from "@/types/event";
+import { Event, EventData } from "@/types/event";
 
 interface EventItemProps {
-  evt: Event;
+  evt: EventData;
 }
 
 const EventItem = ({ evt }: EventItemProps) => {
   return (
     <div className={style.event}>
       <Image
-        src={evt.image ? evt.image : "/images/event-default.png"}
+        src={
+          evt.attributes.img ? evt.attributes.img : "/images/event-default.png"
+        }
         width={170}
         height={100}
-        alt={evt.name}
+        alt={evt.attributes.name}
       />
       <div className={style.info}>
         <span>
-          {evt.date} at {evt.time}
+          {new Date(evt.attributes.date).toLocaleDateString("en-US")} at{" "}
+          {evt.attributes.time}
         </span>
-        <h3>{evt.name}</h3>
+        <h3>{evt.attributes.name}</h3>
       </div>
-      <Link href={`/events/${evt.slug}`}>
+      <Link href={`/events/${evt.id}`}>
         <span className="btn">Details</span>
       </Link>
     </div>

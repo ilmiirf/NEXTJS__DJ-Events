@@ -3,11 +3,11 @@ import { FaPencilAlt, FaTimes } from "react-icons/fa";
 import Image from "next/image";
 import Layout from "@/components/Layout";
 import { API_URL } from "@/config";
-import { Event } from "@/types/event";
+import { Event, EventData } from "@/types/event";
 import style from "@/styles/Event.module.css";
 
 interface EventProps {
-  evt: Event;
+  evt: EventData;
 }
 
 const EventPage = ({ evt }: EventProps) => {
@@ -31,20 +31,21 @@ const EventPage = ({ evt }: EventProps) => {
           </Link>
         </div>
         <span>
-          {evt.date} at {evt.time}
+          {new Date(evt.attributes.date).toLocaleDateString("en-US")} at{" "}
+          {evt.attributes.time}
         </span>
-        <h1>{evt.name}</h1>
-        {evt.image && (
+        <h1>{evt.attributes.name}</h1>
+        {evt.attributes.img && (
           <div className={style.image}>
-            <Image src={evt.image} width={960} height={600} alt="" />
+            <Image src={evt.attributes.img} width={960} height={600} alt="" />
           </div>
         )}
         <h3>Performers</h3>
-        <p>{evt.performers}</p>
+        <p>{evt.attributes.performers}</p>
         <h3>Description</h3>
-        <p>{evt.description}</p>
-        <h3>Venue: {evt.venue}</h3>
-        <p>{evt.address}</p>
+        <p>{evt.attributes.description}</p>
+        <h3>Venue: {evt.attributes.venue}</h3>
+        <p>{evt.attributes.address}</p>
 
         <Link href="/events">
           <span className={style.back}>{"<"} Go Back</span>
@@ -56,10 +57,10 @@ const EventPage = ({ evt }: EventProps) => {
 
 export const getStaticPaths = async () => {
   const res = await fetch(`${API_URL}/api/events`);
-  const events = await res.json();
+  const { data } = await res.json();
 
-  const paths = events.map((evt: Event) => ({
-    params: { slug: evt.slug },
+  const paths = data.map((evt: EventData) => ({
+    params: { slug: evt.id.toString() },
   }));
 
   return {
@@ -70,10 +71,10 @@ export const getStaticPaths = async () => {
 
 export const getStaticProps = async ({ params: { slug } }: any) => {
   const res = await fetch(`${API_URL}/api/events/${slug}`);
-  const events = await res.json();
+  const { data } = await res.json();
   return {
     props: {
-      evt: events[0],
+      evt: data,
     },
     revalidate: 1,
   };

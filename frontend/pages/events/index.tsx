@@ -1,19 +1,19 @@
 import EventItem from "@/components/EventItem";
 import Layout from "@/components/Layout";
 import { API_URL } from "@/config";
-import { Event } from "@/types/event";
+import { Event, EventData } from "@/types/event";
 
 interface EventsProps {
-  events: Event[];
+  data: EventData[];
 }
 
-const Events = ({ events }: EventsProps) => {
+const Events = ({ data }: EventsProps) => {
   return (
     <Layout>
       <h1>Events</h1>
-      {events.length === 0 && <h3>No events to show</h3>}
+      {data.length === 0 && <h3>No events to show</h3>}
 
-      {events.map((evt) => (
+      {data.map((evt) => (
         <EventItem key={evt.id} evt={evt} />
       ))}
     </Layout>
@@ -21,11 +21,11 @@ const Events = ({ events }: EventsProps) => {
 };
 
 export async function getStaticProps() {
-  const res = await fetch(`${API_URL}/api/events`);
-  const events = await res.json();
+  const res = await fetch(`${API_URL}/api/events?_sort=date:ASC&_limit=3`);
+  const { data } = await res.json();
 
   return {
-    props: { events },
+    props: { data },
     revalidate: 1, // In seconds
   };
 }
