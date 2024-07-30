@@ -8,8 +8,9 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import style from "@/styles/Form.module.css";
+import { parseCookies } from "@/helpers";
 
-const AddEvent = () => {
+const AddEvent = ({ token }: { token: string }) => {
   const [values, setValues] = useState({
     name: "",
     performers: "",
@@ -39,6 +40,7 @@ const AddEvent = () => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         data: values,
@@ -46,6 +48,9 @@ const AddEvent = () => {
     });
 
     if (!(await response).ok) {
+      if ((await response).status === 403 || (await response).status === 401) {
+        toast.error("No Token Included");
+      }
       toast.error("Something went wrong");
     } else {
       const data = await (await response).json();
@@ -142,3 +147,13 @@ const AddEvent = () => {
 };
 
 export default AddEvent;
+
+export async function getServerSideProps({ req }: any) {
+  const { token } = parseCookies(req);
+
+  return {
+    props: {
+      token,
+    },
+  };
+}

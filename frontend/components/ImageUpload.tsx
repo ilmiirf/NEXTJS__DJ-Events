@@ -5,9 +5,10 @@ import styles from "@/styles/Form.module.css";
 interface ImageUploadProps {
   evtId: number;
   imageUploaded: (e: any) => void;
+  token: string;
 }
 
-const ImageUpload = ({ evtId, imageUploaded }: ImageUploadProps) => {
+const ImageUpload = ({ evtId, imageUploaded, token }: ImageUploadProps) => {
   const [image, setImage] = useState<any>(null);
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -18,6 +19,9 @@ const ImageUpload = ({ evtId, imageUploaded }: ImageUploadProps) => {
     formData.append("field", "image");
     const res = await fetch(`${API_URL}/upload`, {
       method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
       body: formData,
     });
 

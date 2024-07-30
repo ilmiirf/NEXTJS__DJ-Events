@@ -14,12 +14,14 @@ import { EventData } from "@/types/event";
 import Image from "next/image";
 import { FaImage } from "react-icons/fa";
 import ImageUpload from "@/components/ImageUpload";
+import { parseCookies } from "@/helpers";
 
 interface EditEventProps {
   evt: EventData;
+  token: string;
 }
 
-const EditEvent = ({ evt }: EditEventProps) => {
+const EditEvent = ({ evt, token }: EditEventProps) => {
   const [values, setValues] = useState({
     name: evt.attributes.name,
     performers: evt.attributes.performers,
@@ -55,6 +57,7 @@ const EditEvent = ({ evt }: EditEventProps) => {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         data: values,
@@ -62,6 +65,10 @@ const EditEvent = ({ evt }: EditEventProps) => {
     });
 
     if (!(await response).ok) {
+      if ((await response).status === 403 || (await response).status === 401) {
+        toast.error("Unauthorized");
+        return;
+      }
       toast.error("Something went wrong");
     } else {
       const data = await (await response).json();
@@ -182,20 +189,28 @@ const EditEvent = ({ evt }: EditEventProps) => {
         show={showModal}
         onClose={() => setShowModal(false)}
       >
-        <ImageUpload evtId={evt.id} imageUploaded={imageUploaded} />
+        <ImageUpload
+          evtId={evt.id}
+          imageUploaded={imageUploaded}
+          token={token}
+        />
       </Modal>
     </Layout>
   );
 };
 
-export const getServerSideProps = async (context: any) => {
-  const { id } = context.query;
+export const getServerSideProps = async ({ params: { id }, req }: any) => {
+  const { token } = parseCookies(req);
   const res = await fetch(`${API_URL}/api/events/${id}`);
   const { data } = await res.json();
+
+  console.log(req.headers.cookie);
 
   return {
     props: {
       evt: data,
+
+      token,
     },
   };
 };
